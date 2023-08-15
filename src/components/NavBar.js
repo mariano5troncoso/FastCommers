@@ -8,14 +8,16 @@ import { apiUrl, endpoints } from '../../utils/api.js';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+
 const NavBar = () => {
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth.user);
-  const photo = useSelector((state) => state.auth.photo);
+ 
+  const [user, setUser] = useState(null); // Nuevo estado para el usuario
+  const [photo, setPhoto] = useState(null); // Nuevo estado para la foto
   const [display, setDisplay] = useState(false);
   const navigation = useNavigation();
+  const [token, setToken] = useState(null);
 
-  let token = useSelector((state) => state.auth.token);
+ 
 
   // Función para obtener el token almacenado en AsyncStorage
   const getToken = async () => {
@@ -24,20 +26,34 @@ const NavBar = () => {
       if (value !== null) {
         return value;
       } else {
-        console.log(error)
+        console.log("Token no encontrado");
         return null;
       }
     } catch (error) {
-
+      console.log(error);
       return null;
+    }
+  };
+  const signout = async () => {
+    try {
+      await AsyncStorage.removeItem('token');
+      await AsyncStorage.removeItem('user');
+      await AsyncStorage.removeItem('photo');
+      setToken(null);
+      setUser(null);
+      setPhoto(null);
+      setDisplay(false);
+      navigation.navigate('Home');
+    } catch (error) {
+      console.log(error);
     }
   };
 
   useEffect(() => {
     const getTokenFromStorage = async () => {
-      const storedToken = await getToken();
+      const storedToken = await AsyncStorage.getItem('token');
       if (storedToken) {
-        dispatch(setToken(storedToken));
+        setToken(storedToken);
       }
     };
 
@@ -45,45 +61,21 @@ const NavBar = () => {
   }, []);
 
   const isLoggedIn = () => {
-    return token && user;
+    return token !== null;
   };
 
-  const signout = async () => {
-    try {
-      await axios.post(apiUrl + endpoints.signout, null, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      dispatch(setToken(null));
-      dispatch(setUser(null));
-      dispatch(setPhoto(null));
-
-      console.log('Datos del usuario eliminados')
-
-      navigation.navigate('Home');
-      setDisplay(!display);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const fetchUserData = async () => {
-    try {
-      const response = await axios.get(apiUrl + endpoints.signintoken, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const { user, photo } = response.data.response;
-  
-      dispatch(setUser(user));
-      dispatch(setPhoto(photo));
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   useEffect(() => {
-    if (!user) fetchUserData();
+    const fetchUserAndPhoto = async () => {
+      const storedUser = await AsyncStorage.getItem('user');
+      const storedPhoto = await AsyncStorage.getItem('photo');
+      setUser(storedUser);
+      setPhoto(storedPhoto);
+    };
+
+    fetchUserAndPhoto();
   }, []);
+ 
 
   const handleHomePress = () => {
     navigation.navigate('Home');
@@ -95,10 +87,6 @@ const NavBar = () => {
   }
   const handleSignInPress = () => {
     navigation.navigate('SignIn')
-    setDisplay(!display)
-  }
-  const handleMangasPress = () => {
-    navigation.navigate('Mangas')
     setDisplay(!display)
   }
   const handleProductsPruebaPress = () => {
@@ -130,7 +118,7 @@ const NavBar = () => {
           )}
           {isLoggedIn() && (
                 <TouchableOpacity onPress={handleProductsPruebaPress}>
-                  <Text style={styles.textNavigation}>Products Prueba</Text>
+                  <Text style={styles.textNavigation}>Products</Text>
                 </TouchableOpacity>
               )}
           {isLoggedIn() && (

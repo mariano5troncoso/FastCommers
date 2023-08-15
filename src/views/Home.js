@@ -1,19 +1,14 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ImageBackground, Image, TouchableOpacity, Button } from 'react-native';
+import { StyleSheet, Text, View, ImageBackground, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setToken } from '../../redux/actions/auth.js';
-import LogoMinga from '../../assets/Logo.png';
-import Menu from '../../assets/Menu.png';
-import FondoHome from '../../assets/fondo.jpg'
+import FondoHome from '../../assets/fondo.jpg';
 import NavBar from '../components/NavBar.js';
 
 const Home = (props) => {
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth.user);
-  let token = useSelector((state) => state.auth.token);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
 
   const getToken = async () => {
     try {
@@ -21,7 +16,7 @@ const Home = (props) => {
       if (value !== null) {
         return value;
       } else {
-        console.log('token:' + error)
+        console.log('token:' + error);
         return null;
       }
     } catch (error) {
@@ -31,36 +26,35 @@ const Home = (props) => {
   };
 
   useEffect(() => {
-    const getTokenFromStorage = async () => {
-      const storedToken = await getToken();
-      if (storedToken) {
-        dispatch(setToken(storedToken));
-      }
+    const fetchTokenAndUser = async () => {
+      const storedToken = await AsyncStorage.getItem('token');
+      const storedUser = await AsyncStorage.getItem('user');
+      setToken(storedToken);
+      setUser(storedUser);
     };
 
-    getTokenFromStorage();
+    fetchTokenAndUser();
   }, []);
 
   const isLoggedIn = () => {
     return token && user;
   };
-  
+
   return (
     <ImageBackground source={FondoHome} style={styles.backgroundImage}>
-      <NavBar/>
-      <View style={{ display: "flex", justifyContent: "center", flex: 1, paddingHorizontal: 20 }}>
+      <NavBar />
+      <View style={styles.container}>
         <Text style={styles.TextWhite}>FastCommerce</Text>
         <Text style={styles.TextSub}>
-        Join the online commerce revolution with FastCommerce. Get started today and experience the future of eCommerce!
+          Join the online commerce revolution with FastCommerce. Get started today and experience the future of eCommerce!
         </Text>
-        {!isLoggedIn() && (
+        {!isLoggedIn() ? (
           <TouchableOpacity onPress={() => props.navigation.navigate('SignIn')}>
             <LinearGradient colors={['#525558', '#394651']} start={[0, 0]} end={[0, 1]} style={styles.buttonGradient}>
               <Text style={styles.textButtonHome}>Sign In</Text>
             </LinearGradient>
           </TouchableOpacity>
-        )}
-        {isLoggedIn() && (
+        ) : (
           <TouchableOpacity onPress={() => props.navigation.navigate('ProductsPrueba')}>
             <LinearGradient colors={['gray', 'gray']} start={[0, 0]} end={[0, 1]} style={styles.buttonGradient}>
               <Text style={styles.textButtonHome}>Search products</Text>
@@ -73,42 +67,24 @@ const Home = (props) => {
   );
 };
 
-export default Home;
-
 const styles = StyleSheet.create({
   container: {
+    display: 'flex',
+    justifyContent: 'center',
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'start',
+    paddingHorizontal: 20,
   },
   backgroundImage: {
     flex: 1,
-    resizeMode: 'cover', 
+    resizeMode: 'cover',
     alignItems: 'center',
-    justifyContent: 'start',
-  
-  },
-  LogoMinga: {
-    width: 75,
-    height: 75,
-    objectFit: 'contain',
-  },
-  NavBar: {
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'space-between',
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-    alignItems: 'center',
+    justifyContent: 'center',
   },
   TextWhite: {
     color: 'white',
     fontSize: 51,
     letterSpacing: 2.4,
     textAlign: 'center',
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
     fontWeight: 'bold',
   },
   TextSub: {
@@ -116,8 +92,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     padding: 20,
     fontWeight: 'bold',
-    
-    
   },
   buttonGradient: {
     width: 363,
@@ -139,5 +113,4 @@ const styles = StyleSheet.create({
   },
 });
 
-
-  
+export default Home;

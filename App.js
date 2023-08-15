@@ -10,7 +10,7 @@ import NavBar from './src/components/NavBar.js';
 export default function App() {
   return (
     <Provider store={store}> 
-      <NavigationContainer documentTitle={'Minga'}>
+      <NavigationContainer documentTitle={'FastCommers'}>
         <StackNavigator />
       </NavigationContainer>
     </Provider>

@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import products from '../components/ProductPrueba';
-import NavBar from '../components/NavBar';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-
-const ProductsPrueba = () => {
+import { data_products } from '../../redux/actions/productAction';
+import NavBar from '../components/NavBar';
+const ProductsScreen = () => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const products = useSelector((state) => state.products.products);
+
+  useEffect(() => {
+    dispatch(data_products());
+  }, [dispatch]);
 
   const handleProductDetailsPress = (productId) => {
     navigation.navigate('ProductDetails', { productId });
@@ -13,18 +19,15 @@ const ProductsPrueba = () => {
 
   return (
     <ScrollView>
-      <NavBar />
+      <NavBar/>
       <View style={styles.container}>
-      {products.map((product) => (
+        {products.map((product) => (
           <TouchableOpacity
-            key={product.id} // Utiliza el _id del producto como clave
+            key={product._id}
             style={styles.productCard}
-            onPress={() => handleProductDetailsPress(product.id)} // Pasa el _id del producto
+            onPress={() => handleProductDetailsPress(product._id)}
           >
-            <Image
-              source={{ uri: product.cover_photo[0] }}
-              style={styles.productImage}
-            />
+            <Image source={{ uri: product.cover_photo[0] }} style={styles.productImage} />
             <Text style={styles.productName}>{product.name}</Text>
             <Text style={styles.productPrice}>Price: ${product.price}</Text>
           </TouchableOpacity>
@@ -41,10 +44,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     padding: 10,
-    backgroundColor:'rgb(92,110,141)',
+    backgroundColor: 'rgb(92, 110, 141)',
   },
   productCard: {
-    width: '48%', // Ajusta el ancho de cada tarjeta de producto según tu diseño
+    width: '48%',
     marginBottom: 20,
     backgroundColor: '#fff',
     borderRadius: 10,
@@ -71,4 +74,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ProductsPrueba;
+export default ProductsScreen;
