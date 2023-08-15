@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { ImageBackground,View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { ImageBackground, View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useDispatch } from 'react-redux';
-import { setToken, setUser, setPhoto } from '../../redux/actions/auth.js';
-import { apiUrl, endpoints } from '../../utils/api.js';
-import axios from 'axios';
+
+import { api, apiUrl, endpoints } from '../../utils/api.js'; // Importa api y endpoints correctamente
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NavBar from '../components/NavBar.js';
 
 const SignIn = ({ navigation }) => {
-  const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -18,33 +16,29 @@ const SignIn = ({ navigation }) => {
       alert('Please enter email and password.');
       return;
     }
-
+  
     let data = {
       email: email,
       password: password,
     };
-
-    axios
-      .post(apiUrl + endpoints.signin, data)
+  
+    api.post(endpoints.login, data) // Utiliza endpoints.login
       .then((res) => {
         if (res && res.data && res.data.response) {
           const { user, photo, token } = res.data.response;
 
           AsyncStorage.setItem('token', token)
-            .then(() => AsyncStorage.setItem('user', JSON.stringify(user)))
-            .then(() => AsyncStorage.setItem('photo', photo))
-            .then(() => {
-              alert('User signed in!');
-              navigation.navigate('Home');
-            })
-            .catch((error) => {
-              console.log(error.message);
-              alert('An error occurred while saving data. Please try again later.');
-            });
-        } else {
-          alert('Invalid response from the server');
-        }
-      })
+          .then(() => AsyncStorage.setItem('user', JSON.stringify(user)))
+          .then(() => AsyncStorage.setItem('photo', photo))
+          .then(() => {
+            alert('User signed in!');
+            navigation.navigate('Home');
+          })
+          .catch((error) => {
+            console.log(error.message);
+            alert('An error occurred while saving data. Please try again later.');
+          });
+      }})
       .catch((error) => {
         if (error.response && error.response.data) {
           const err = error.response.data.message || 'Unknown error';

@@ -9,7 +9,7 @@ import FormManga from "../pages/Manga-Form";
 import Mangas from "../pages/Mangas";
 import MangaDetail from "../pages/MangaDetail";
 import VerifyCode from "../components/verifyCode";
-import ProductsPrueba from "../views/Products";
+import ProductsScreen from "../views/Products";
 
 
 
@@ -33,9 +33,9 @@ const router = createBrowserRouter([
             {
                 path:'/ProductsPrueba',
                 element: (
-                    <ProtectedProductsPrueba>
-                    <ProductsPrueba />
-                    </ProtectedProductsPrueba> 
+                    <ProtectedProductsScreen>
+                    <ProductsScreen />
+                    </ProtectedProductsScreen> 
                 )
             },
             {
@@ -51,7 +51,7 @@ const router = createBrowserRouter([
                 element: <Welcome />
             },
             {
-                path:'/signin',
+                path:'/SignIn',
                 element: (
                     <ProtectedSignIn>
                     <SignIn />
